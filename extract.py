@@ -52,19 +52,30 @@ with open("employee_data.csv", mode="w", newline="") as file:
 
 # Upload the CSV file to a GCS bucket
 def upload_to_gcs(bucket_name, source_file_name, destination_blob_name):
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(destination_blob_name)
+    try:
+        print(
+            f"Attempting to upload {source_file_name} to gs://{bucket_name}/{destination_blob_name}"
+        )
 
-    blob.upload_from_filename(source_file_name)
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(destination_blob_name)
 
-    print(
-        f"File {source_file_name} uploaded to {destination_blob_name} in {bucket_name}."
-    )
+        blob.upload_from_filename(source_file_name)
+
+        print(
+            f"✅ Success! File {source_file_name} uploaded to {destination_blob_name} in {bucket_name}."
+        )
+
+    except FileNotFoundError:
+        print(f"❌ Error: Local file {source_file_name} not found")
+    except Exception as e:
+        print(f"❌ Error uploading file: {e}")
+        print(f"Error type: {type(e).__name__}")
 
 
 # Set your GCS bucket name and destination file name
-bucket_name = "bkt-employee-data"
+bucket_name = "bkt-employee-data-gcp"
 source_file_name = "employee_data.csv"
 destination_blob_name = "employee_data.csv"
 
